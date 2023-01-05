@@ -150,3 +150,5 @@ The feature manager supports _appsettings.json_ as a configuration source for fe
 To use feature flags effectively, you need to externalize all the feature flags used in an application. This approach allows you to change feature flag states without modifying and redeploying the application itself.
 
 Azure App Configuration is designed to be a centralized repository for feature flags. You can use it to define different kinds of feature flags and manipulate their states quickly and confidently. You can then use the App Configuration libraries for various programming language frameworks to easily access these feature flags from your application.
+
+### [Go Back](../README.md)
