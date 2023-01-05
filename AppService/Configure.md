@@ -63,3 +63,90 @@ If you configure the Azure Storage blobs option for a log type, you need a clien
 For logs stored in the App Service file system, the easiest way is to download the ZIP file in the browser at:
 - **Linux/container apps**: `https://<app-name>.scm.azurewebsites.net/api/logs/docker/zip`
 - **Windows apps**: `https://<app-name>.scm.azurewebsites.net/api/dump`
+
+## Configure security certificates
+App Service has tools that let you create, upload, or import a private certificate or a public certificate into App Service.
+
+A certificate uploaded into an app is stored in a deployment unit that is bound to the app service plan's resource group and region combination (internally called a webspace). This makes the certificate accessible to other apps in the same resource group and region combination.
+
+Options you have for adding certificates in App Service:
+Option	| Description
+--- | ---
+Create a free App Service managed certificate | A private certificate that's free of charge and easy to use if you just need to secure your custom domain in App Service.
+Purchase an App Service certificate | A private certificate that's managed by Azure. It combines the simplicity of automated certificate management and the flexibility of renewal and export options.
+Import a certificate from Key Vault	| Useful if you use Azure Key Vault to manage your certificates.
+Upload a private certificate | If you already have a private certificate from a third-party provider, you can upload it.
+Upload a public certificate	| Public certificates are not used to secure custom domains, but you can load them into your code if you need them to access remote resources.
+
+### Private certificate requirements
+If you want to use a private certificate in App Service, your certificate must meet the following requirements:
+- Exported as a password-protected PFX file, encrypted using triple DES.
+- Contains private key at least 2048 bits long
+- Contains all intermediate certificates in the certificate chain
+
+To secure a custom domain in a TLS binding, the certificate has additional requirements:
+- Contains an Extended Key Usage for server authentication (OID = 1.3.6.1.5.5.7.3.1)
+- Signed by a trusted certificate authority
+
+### Free App Service managed certificate limitations
+- Does not support wildcard certificates.
+- Does not support usage as a client certificate by certificate thumbprint.
+- Is not exportable.
+- Is not supported on App Service Environment (ASE).
+- Is not supported with root domains that are integrated with Traffic Manager.
+- If a certificate is for a CNAME-mapped domain, the CNAME must be mapped directly to `<app-name>.azurewebsites.net`.
+
+### App Service certificate
+- If you purchase an App Service Certificate from Azure, Azure manages the following tasks:
+- Takes care of the purchase process from GoDaddy.
+- Performs domain verification of the certificate.
+- Maintains the certificate in Azure Key Vault.
+- Manages certificate renewal.
+- Synchronize the certificate automatically with the imported copies in App Service apps.
+
+### Upload a private certificate
+If your certificate authority gives you multiple certificates in the certificate chain, you need to merge the certificates in order. Then you can Export your merged TLS/SSL certificate with the private key that your certificate request was generated with.
+
+If you generated your certificate request using OpenSSL, then you have created a private key file. To export your certificate to PFX, run the following command. 
+`openssl pkcs12 -export -out myserver.pfx -inkey <private-key-file> -in <merged-certificate-file>`
+
+## Manage app features
+Feature management is a modern software-development practice that decouples feature release from code deployment and enables quick changes to feature availability on demand. It uses a technique called feature flags (also known as feature toggles, feature switches, and so on) to dynamically administer a feature's lifecycle.
+
+Here are several new terms related to feature management:
+- **Feature flag**: A feature flag is a variable with a binary state of _on_ or _off_. The feature flag also has an associated code block. The state of the feature flag triggers whether the code block runs or not.
+- **Feature manager**: A feature manager is an application package that handles the lifecycle of all the feature flags in an application. The feature manager typically provides additional functionality, such as caching feature flags and updating their states.
+- **Filter**: A filter is a rule for evaluating the state of a feature flag. A user group, a device or browser type, a geographic location, and a time window are all examples of what a filter can represent.
+
+An effective implementation of feature management consists of at least two components working in concert:
+- An application that makes use of feature flags.
+- A separate repository that stores the feature flags and their current states.
+
+### Feature flag declaration
+Each feature flag has two parts: a name and a list of one or more filters that are used to evaluate if a feature's state is _on_ (that is, when its value is `True`). A filter defines a use case for when a feature should be turned on.
+
+When a feature flag has multiple filters, the filter list is traversed in order until one of the filters determines the feature 
+should be enabled. At that point, the feature flag is _on_, and any remaining filter results are skipped. If no filter indicates the feature should be enabled, the feature flag is _off_.
+
+The feature manager supports _appsettings.json_ as a configuration source for feature flags. The following example shows how to set up feature flags in a JSON file:
+```
+"FeatureManagement": {
+    "FeatureA": true, // Feature flag set to on
+    "FeatureB": false, // Feature flag set to off
+    "FeatureC": {
+        "EnabledFor": [
+            {
+                "Name": "Percentage",
+                "Parameters": {
+                    "Value": 50
+                }
+            }
+        ]
+    }
+}
+```
+
+### Feature flag repository
+To use feature flags effectively, you need to externalize all the feature flags used in an application. This approach allows you to change feature flag states without modifying and redeploying the application itself.
+
+Azure App Configuration is designed to be a centralized repository for feature flags. You can use it to define different kinds of feature flags and manipulate their states quickly and confidently. You can then use the App Configuration libraries for various programming language frameworks to easily access these feature flags from your application.
