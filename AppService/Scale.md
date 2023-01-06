@@ -14,6 +14,7 @@ Autoscaling responds to changes in the environment by adding or removing web ser
 
 #### Autoscaling rules
 Autoscaling makes its decisions based on rules that you define. A rule specifies the threshold for a metric, and triggers an autoscale event when this threshold is crossed. Autoscaling can also deallocate resources when the workload has diminished.
+
 Define your autoscaling rules carefully. For example, a Denial of Service attack will likely result in a large-scale influx of incoming traffic. Trying to handle a surge in requests caused by a DoS attack would be fruitless and expensive. These requests aren't genuine, and should be discarded rather than processed. A better solution is to implement detection and filtering of requests that occur during such an attack before they reach your service.
 
 ### When should you consider autoscaling?
@@ -57,5 +58,29 @@ Autoscaling works by analyzing trends in metric values over time across all inst
 In the first step, an autoscale rule aggregates the values retrieved for a metric for all instances across a period of time known as the _time grain_. Each metric has its own intrinsic _time grain_, but in most cases this period is 1 minute. The aggregated value is known as the _time aggregation_. The options available are _Average_, _Minimum_, _Maximum_, _Sum_, _Last_, and _Count_.
 An interval of one minute is a very short interval in which to determine whether any change in metric is long-lasting enough to make autoscaling worthwhile. So, an autoscale rule performs a second step that performs a further aggregation of the value calculated by the _time aggregation_ over a longer, user-specified period, known as the _Duration_. The minimum _Duration_ is 5 minutes. If the _Duration_ is set to 10 minutes for example, the autoscale rule will aggregate the 10 values calculated for the _time grain_.
 The aggregation calculation for the _Duration_ can be different from that of the _time grain_. For example, if the _time aggregation_ is _Average_ and the statistic gathered is _CPU Percentage_ across a one-minute _time grain_, each minute the average CPU percentage utilization across all instances for that minute will be calculated. If the _time grain_ statistic is set to _Maximum_, and the _Duration_ of the rule is set to 10 minutes, the maximum of the 10 average values for the CPU percentage utilization will be used to determine whether the rule threshold has been crossed.
+
+## Autoscale actions
+When an autoscale rule detects that a metric has crossed a threshold, it can perform an autoscale action. An autoscale action can be _scale-out_ or _scale-in_. A scale-out action increases the number of instances, and a scale-in action reduces the instance count. An autoscale action uses an operator (such as _less than_, _greater than_, _equal to_, and so on) to determine how to react to the threshold. Scale-out actions typically use the _greater than_ operator to compare the metric value to the threshold. Scale-in actions tend to compare the metric value to the threshold with the _less than_ operator. An autoscale action can also set the instance count to a specific level, rather than incrementing or decrementing the number available.
+
+An autoscale action has a _cool down period_, specified in minutes. During this interval, the scale rule won't be triggered again. This is to allow the system to stabilize between autoscale events. Remember that it takes time to start up or shut down instances, and so any metrics gathered might not show any significant changes for several minutes. The minimum cool down period is five minutes.
+
+## Pairing autoscale rules
+You should plan for scaling-in when a workload decreases. Consider defining autoscale rules in pairs in the same autoscale condition. One autoscale rule should indicate how to scale the system out when a metric exceeds an upper threshold. Then other rule should define how to scale the system back in again when the same metric drops below a lower threshold.
+
+## Combining autoscale rules
+A single autoscale condition can contain several autoscale rules (for example, a scale-out rule and the corresponding scale-in rule). However, the autoscale rules in an autoscale condition don't have to be directly related. You could define the following four rules in the same autoscale condition:
+- If the HTTP queue length exceeds 10, scale out by 1
+- If the CPU utilization exceeds 70%, scale out by 1
+- If the HTTP queue length is zero, scale in by 1
+- If the CPU utilization drops below 50%, scale in by 1
+
+When determining whether to scale out, the autoscale action will be performed **if any** of the scale-out rules are met (HTTP queue length exceeds 10 or CPU utilization exceeds 70%). When scaling in, the autoscale action will run **only if all** of the scale-in rules are met (HTTP queue length drops to zero and CPU utilization falls below 50%). If you need to scale in if only one of the scale-in rules are met, you must define the rules in separate autoscale conditions.
+
+## Autoscale best practices
+- Ensure the maximum and minimum values are different and have an adequate margin between them
+- Choose the appropriate statistic for your diagnostics metric (_Average_, _Minimum_, _Maximum_ and _Total_)
+- Choose the thresholds carefully for all metric types (the endless cycle of instances being brought up and down is called _flapping_)
+- Always select a safe default instance count
+- Configure autoscale notifications
 
 ### [Go Back](../README.md)
