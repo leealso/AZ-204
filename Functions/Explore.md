@@ -11,7 +11,7 @@ Both Functions and Logic Apps enable serverless workloads. Azure Functions is a 
 For Azure Functions, you develop orchestrations by writing code and using the Durable Functions extension. For Logic Apps, you create orchestrations by using a GUI or editing configuration files.
 
 You can mix and match services when you build an orchestration, calling functions from logic apps and calling logic apps from functions. The following table lists some of the key differences between these:
- | Azure Functions | Logic Apps
+| | Azure Functions | Logic Apps
  --- | --- | --- 
 Development | Code-first (imperative) | Designer-first (declarative)
 Connectivity | About a dozen built-in binding types, write code for custom bindings | Large collection of connectors, Enterprise Integration Pack for B2B scenarios, build custom connectors
@@ -24,7 +24,7 @@ Execution context | Can run locally or in the cloud | Supports run-anywhere scen
 Like Azure Functions, Azure App Service WebJobs with the WebJobs SDK is a code-first integration service that is designed for developers. Both are built on Azure App Service and support features such as source control integration, authentication, and monitoring with Application Insights integration.
 
 Azure Functions is built on the WebJobs SDK, so it shares many of the same event triggers and connections to other Azure services. Here are some factors to consider when you're choosing between Azure Functions and WebJobs with the WebJobs SDK:
- | Functions | WebJobs with WebJobs SDK
+| | Functions | WebJobs with WebJobs SDK
  --- | --- | ---
 Serverless app model with automatic scaling | Yes | No
 Develop and test in browser | Yes | No
