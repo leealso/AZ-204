@@ -45,7 +45,8 @@ WebJobs content | IP restrictions
 Hybrid connections * | Always On
 Virtual network integration * | Diagnostic log settings
 Service endpoints * | Cross-origin resource sharing (CORS)
-Azure Content Delivery Network * | 
+Azure Content Delivery Network * | xs
+
 Features marked with an asterisk (*) are planned to be unswapped.
 
 ## Swap deployment slots
@@ -96,3 +97,5 @@ To let users opt out of your beta app, for example, you can put this link on you
 ```
 
 By default, new slots are given a routing rule of `0%`, a default value is displayed in grey. When you explicitly set this value to `0%` it is displayed in black, your users can access the staging slot manually by using the `x-ms-routing-name` query parameter. But they won't be routed to the slot automatically because the routing percentage is set to 0. This is an advanced scenario where you can "hide" your staging slot from the public while allowing internal teams to test changes on the slot.
+
+### [Go Back](../README.md)
