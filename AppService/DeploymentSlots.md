@@ -45,7 +45,7 @@ WebJobs content | IP restrictions
 Hybrid connections * | Always On
 Virtual network integration * | Diagnostic log settings
 Service endpoints * | Cross-origin resource sharing (CORS)
-Azure Content Delivery Network * | xs
+Azure Content Delivery Network * | 
 
 Features marked with an asterisk (*) are planned to be unswapped.
 
